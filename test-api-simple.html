@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps API Simple Test</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            border: 1px solid #ccc;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Google Maps API Test</h1>
+    <div id="status"></div>
+    <div id="map"></div>
+
+    <script>
+        const API_KEY = 'AIzaSyCCFF1xVc0PtFxGlEAQ9u5DSKpxdg-AUvE';
+        const statusDiv = document.getElementById('status');
+
+        function showStatus(message, isError = false) {
+            statusDiv.innerHTML = `<div class="status ${isError ? 'error' : 'success'}">${message}</div>`;
+        }
+
+        function initMap() {
+            try {
+                showStatus('Loading Google Maps API...');
+
+                const map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: 40.7128, lng: -74.0060 },
+                    zoom: 13
+                });
+
+                showStatus('✅ Google Maps API loaded successfully! Map should be visible below.');
+
+                // Test Places API
+                const service = new google.maps.places.PlacesService(map);
+                const request = {
+                    location: { lat: 40.7128, lng: -74.0060 },
+                    radius: 1000,
+                    type: 'point_of_interest'
+                };
+
+                service.nearbySearch(request, (results, status) => {
+                    if (status === google.maps.places.PlacesServiceStatus.OK) {
+                        showStatus(`✅ Places API working! Found ${results.length} places nearby.`);
+                    } else {
+                        showStatus(`❌ Places API error: ${status}`, true);
+                    }
+                });
+
+            } catch (error) {
+                showStatus(`❌ Error initializing map: ${error.message}`, true);
+            }
+        }
+
+        // Load the API
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places&callback=initMap`;
+        script.async = true;
+        script.defer = true;
+
+        script.onerror = () => {
+            showStatus('❌ Failed to load Google Maps API script', true);
+        };
+
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
